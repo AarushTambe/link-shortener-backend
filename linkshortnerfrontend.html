@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Link Shortener</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #f4f4f4;
+      padding: 40px;
+    }
+    .box {
+      background: white;
+      padding: 20px;
+      width: 400px;
+      border-radius: 8px;
+    }
+    input, button {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box; 
+    margin-bottom: 10px;
+    }
+    button {
+    cursor: pointer;
+    }
+    #result {
+      margin-top: 15px;
+      word-break: break-all;
+    }
+
+    .success {
+      color: #2e7d32; /* calm green */
+      font-weight: bold;
+    }
+
+    .error {
+      color: #c62828; /* calm red */
+      font-weight: bold;
+    }
+    
+  </style>
+  <script>
+
+  async function getAllUrl() {
+    const res = await fetch("http://localhost:4000/allurl");
+    const data = await res.json();
+
+    const resultDiv = document.getElementById("result");
+    resultDiv.innerHTML = ""; // clear old content
+
+    data.forEach((row) => {
+      const div = document.createElement("div");
+      div.style.marginBottom = "10px";
+
+      div.innerHTML = `
+        <strong>Short:</strong>
+        <a href="http://localhost:4000/${row.shortlink}" target="_blank">
+          ${row.shortlink}
+        </a><br>
+        <strong>Long:</strong> ${row.longlink}
+        <hr>
+      `;
+
+    resultDiv.appendChild(div);
+  });
+}
+ 
+    async function shortenUrl() {
+      const longUrl = document.getElementById("longUrl").value;
+      const shortUrl = document.getElementById("customCode").value;
+      const resultDiv = document.getElementById("result");
+      resultDiv.className = "";
+      resultDiv.innerText = "";
+
+      if (!longUrl) {
+        resultDiv.className = "error";
+        resultDiv.innerText = "Please enter a URL";
+        return;
+      }
+
+      if (!shortUrl) {
+        resultDiv.className = "error";
+        resultDiv.innerText = "Please enter a short code";
+        return;
+      }
+
+      try {
+        const response = await fetch("http://localhost:4000/shorten", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ longUrl, shortUrl })
+        });
+        
+        const data = await response.json();
+
+        if (!response.ok) {
+          resultDiv.className = "error";
+        resultDiv.innerText = "Error creating short link: " + data.err;
+          return;
+        }
+
+        if(data.reused)
+          resultDiv.innerHTML = `ShortCode already exist<br>`
+        else
+          resultDiv.innerHTML = ``
+
+        resultDiv.innerHTML += `
+          Short URL:
+          <a href="${data.shortUrl}" target="_blank">
+            ${data.shortUrl}
+          </a>
+        `;
+      } catch (err) {
+        resultDiv.className = "error";
+        resultDiv.innerText = "Server not reachable";
+      }
+    }
+  </script>
+</head>
+
+<body>
+
+  <div class="box">
+    <h2>Link Shortener</h2>
+
+    <input
+      type="text"
+      id="longUrl"
+      placeholder="Paste long URL here"
+      required
+    />
+  <input
+    type="text"
+    id="customCode"
+    placeholder="Custom short link"
+    required
+  />
+    <button onclick="shortenUrl()">Shorten</button><hr>
+    <button onclick="getAllUrl()">Show All Links</button>
+    <div id="result"></div>
+  </div>
+  
+</body>
+</html>

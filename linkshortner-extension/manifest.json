@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "Link Shortener Redirect",
+  "version": "1.0",
+  "description": "Redirect short links using custom omnibox keyword",
+  "permissions": ["tabs"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "omnibox": {
+    "keyword": "ls"
+  }
+}
