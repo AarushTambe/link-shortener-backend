@@ -1,11 +1,11 @@
 const { Pool } = require("pg");
 
 const pool = new Pool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT,
+  host: 'ep-rough-union-a1esto9b-pooler.ap-southeast-1.aws.neon.tech',
+  user: 'neondb_owner',
+  password: 'npg_xTQlFYuP31XB',
+  database: 'neondb',
+  port: 5432,
   ssl: { rejectUnauthorized: false }
 });
 

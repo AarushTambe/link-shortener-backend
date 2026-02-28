@@ -28,17 +28,7 @@
       margin-top: 15px;
       word-break: break-all;
     }
-
-    .success {
-      color: #2e7d32; /* calm green */
-      font-weight: bold;
-    }
-
-    .error {
-      color: #c62828; /* calm red */
-      font-weight: bold;
-    }
-    
+ 
   </style>
   <script>
 
@@ -47,7 +37,7 @@
     const data = await res.json();
 
     const resultDiv = document.getElementById("result");
-    resultDiv.innerHTML = ""; // clear old content
+    resultDiv.innerHTML = ""; 
 
     data.forEach((row) => {
       const div = document.createElement("div");
@@ -70,17 +60,14 @@
       const longUrl = document.getElementById("longUrl").value;
       const shortUrl = document.getElementById("customCode").value;
       const resultDiv = document.getElementById("result");
-      resultDiv.className = "";
-      resultDiv.innerText = "";
+      
 
       if (!longUrl) {
-        resultDiv.className = "error";
         resultDiv.innerText = "Please enter a URL";
         return;
       }
 
       if (!shortUrl) {
-        resultDiv.className = "error";
         resultDiv.innerText = "Please enter a short code";
         return;
       }
@@ -97,8 +84,7 @@
         const data = await response.json();
 
         if (!response.ok) {
-          resultDiv.className = "error";
-        resultDiv.innerText = "Error creating short link: " + data.err;
+          resultDiv.innerText = "Error creating short link. Error: " + data.err;
           return;
         }
 
@@ -114,8 +100,7 @@
           </a>
         `;
       } catch (err) {
-        resultDiv.className = "error";
-        resultDiv.innerText = "Server not reachable";
+        resultDiv.innerText = "Server not reachable"+err;
       }
     }
   </script>
