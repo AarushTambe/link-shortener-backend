@@ -10,7 +10,7 @@ const { createUrl, getLongUrl, getAllUrl, shortCodeExists, longCodeExists, getSh
 
 const app = express();
 app.use(express.json());
-
+const path = require("path");
 const PORT = 4000;
 
 function generateShortCode() {
@@ -124,7 +124,9 @@ app.get("/:shortCode", async (req, res) => {
   }
 });
 
-
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "linkshortner.html"));
+});
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
