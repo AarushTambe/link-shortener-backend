@@ -37,7 +37,7 @@
   Intended for visibility and testing.
  */
   async function getAllUrl() {
-    const res = await fetch("http://localhost:4000/allurl");
+    const res = await fetch("/allurl");
     const data = await res.json();
 
     const resultDiv = document.getElementById("result");
@@ -50,7 +50,7 @@
       div.innerHTML = `
   <div style="display:flex; justify-content:space-between; align-items:center;">
     <div>
-       ${row.longlink} - [ <a href="http://localhost:4000/${row.shortlink}" target="_blank">
+       ${row.longlink} - [ <a href="/${row.shortlink}" target="_blank">
         ${row.shortlink}
       </a> ]
     </div>
@@ -89,7 +89,7 @@
       }
 
       try {
-        const response = await fetch("http://localhost:4000/shorten", {
+        const response = await fetch("/shorten", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -126,7 +126,7 @@
       if (!confirm("Delete short link " + shortCode +"?")) return;
 
       try {
-        const res = await fetch("http://localhost:4000/delete/"+shortCode, {
+        const res = await fetch("/delete/"+shortCode, {
         method: "DELETE"
       });
 
