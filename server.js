@@ -30,6 +30,10 @@ app.use((req, res, next) => {
   next();
 });
 
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "linkshortnerfrontend.html"));
+});
+
 /* 
   Creates a custom short link provided by the user.
   Enforces:
@@ -122,10 +126,6 @@ app.get("/:shortCode", async (req, res) => {
     console.error(err);
     res.status(500).send("Server error");
   }
-});
-
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "linkshortner.html"));
 });
 
 app.listen(PORT, () => {
