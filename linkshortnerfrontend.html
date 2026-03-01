@@ -32,6 +32,10 @@
   </style>
   <script>
 
+/*
+  Fetch and display all stored short links.
+  Intended for visibility and testing.
+ */
   async function getAllUrl() {
     const res = await fetch("http://localhost:4000/allurl");
     const data = await res.json();
@@ -55,7 +59,11 @@
     resultDiv.appendChild(div);
   });
 }
- 
+
+/*
+  Sends user-defined shortcode and long URL
+  to the backend and displays feedback.
+ */
     async function shortenUrl() {
       const longUrl = document.getElementById("longUrl").value;
       const shortUrl = document.getElementById("customCode").value;

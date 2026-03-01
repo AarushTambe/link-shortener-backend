@@ -1,3 +1,8 @@
+/* 
+  Entry point for the Link Shortener backend.
+  Exposes APIs to create custom short links and
+  redirect short links to original URLs.
+*/
 // require("dotenv").config();
 const express = require("express");
 const crypto = require("crypto");
@@ -12,6 +17,10 @@ function generateShortCode() {
   return crypto.randomBytes(3).toString("hex"); // 6 chars
 }
 
+/*
+  Enable CORS so the frontend and Chrome extension
+  can communicate with this backend from any origin.
+*/
 const cors = require("cors");
 app.use(cors());
 
@@ -21,7 +30,12 @@ app.use((req, res, next) => {
   next();
 });
 
-/* CREATE SHORT LINK */
+/* 
+  Creates a custom short link provided by the user.
+  Enforces:
+   - shortcode uniqueness
+   - one-to-one mapping between short and long URLs
+*/
 app.post("/shorten", async (req, res) => {
   try {
     const { longUrl, shortUrl } = req.body;
@@ -29,7 +43,7 @@ app.post("/shorten", async (req, res) => {
    console.log(longUrl)
    console.log(shortUrl)
 
-    // 🔵 STEP 1: Check if long URL already exists
+    // STEP 1: Check if long URL already exists
     var shortCode = await getShortUrl(longUrl);
     console.log(shortCode)
     if(shortCode){
@@ -39,15 +53,15 @@ app.post("/shorten", async (req, res) => {
       });
     }
     
+    //  STEP 2: Validate short code
     customCode = shortUrl
-    // 🔵 STEP 2: Validate short code
     if (!/^[a-zA-Z0-9_-]+$/.test(customCode)) {
       return res.status(400).json({
         error: "Short link can contain only letters, numbers, _ and -"
       });
     }
 
-    // 🔵 STEP 3: Check short code uniqueness
+    //  STEP 3: Check short code uniqueness
     const taken = await shortCodeExists(customCode);
     if (taken) {
       return res.status(409).json({
@@ -55,7 +69,7 @@ app.post("/shorten", async (req, res) => {
       });
     }
 
-    // 🔵 STEP 4: Create mapping
+    //  STEP 4: Create mapping
     await createUrl(customCode, longUrl);
 
     res.json({
@@ -70,7 +84,9 @@ app.post("/shorten", async (req, res) => {
 });
 
 
-/* ---------- READ ALL URL ---------- */
+/* 
+  Reterives all the links
+*/
 app.get("/allurl", async (req, res) => {
   try {
     const result = await getAllUrl();
@@ -82,7 +98,11 @@ app.get("/allurl", async (req, res) => {
   }
 });
 
-/* REDIRECT */
+/*
+  GET shortcode
+  Resolves a shortcode and performs an HTTP redirect
+  to the original long URL.
+ */
 app.get("/:shortCode", async (req, res) => {
   console.log("called short code......"+req.params.shortCode)
   try {
