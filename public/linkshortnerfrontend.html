@@ -5,7 +5,7 @@
   <title>Link Shortener</title>
   <style>
     body {
-      font-family: Arial;
+      font-family: 'Arial';
       background: #f4f4f4;
       padding: 40px;
     }
@@ -48,13 +48,21 @@
       div.style.marginBottom = "10px";
 
       div.innerHTML = `
-        <strong>Short:</strong>
-        <a href="http://localhost:4000/${row.shortlink}" target="_blank">
-          ${row.shortlink}
-        </a><br>
-        <strong>Long:</strong> ${row.longlink}
-        <hr>
-      `;
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <div>
+       ${row.longlink} - [ <a href="http://localhost:4000/${row.shortlink}" target="_blank">
+        ${row.shortlink}
+      </a> ]
+    </div>
+
+    <a href="#"
+       onclick="deleteShortLink(event, '${row.shortlink}')"
+       style="color:red; font-size:12px; text-decoration:none;">
+      <strong>Delete</strong>
+    </a>
+  </div>
+  <hr>
+`;
 
     resultDiv.appendChild(div);
   });
@@ -63,7 +71,7 @@
 /*
   Sends user-defined shortcode and long URL
   to the backend and displays feedback.
- */
+*/
     async function shortenUrl() {
       const longUrl = document.getElementById("longUrl").value;
       const shortUrl = document.getElementById("customCode").value;
@@ -111,30 +119,60 @@
         resultDiv.innerText = "Server not reachable"+err;
       }
     }
+
+    async function deleteShortLink(event, shortCode) {
+      event.preventDefault(); // stop navigation
+
+      if (!confirm("Delete short link " + shortCode +"?")) return;
+
+      try {
+        const res = await fetch("http://localhost:4000/delete/"+shortCode, {
+        method: "DELETE"
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.err || "Delete failed");
+        return;
+      }
+
+      alert("Short link deleted successfully");
+      getAllUrl();
+    } catch (err) {
+      alert("Server not reachable");
+    }
+  }
   </script>
 </head>
 
 <body>
 
   <div class="box">
-    <h2>Link Shortener</h2>
+  <h2>Link Shortener</h2>
 
-    <input
-      type="text"
-      id="longUrl"
-      placeholder="Paste long URL here"
-      required
-    />
+  <label>Long URL</label>
+  <input
+    type="text"
+    id="longUrl"
+    placeholder="https://www.google.com/very/long/link"
+  />
+
+  <label>Custom short code</label>
   <input
     type="text"
     id="customCode"
-    placeholder="Custom short link"
-    required
+    placeholder="e.g. myGoogle-1"
   />
-    <button onclick="shortenUrl()">Shorten</button><hr>
-    <button onclick="getAllUrl()">Show All Links</button>
-    <div id="result"></div>
-  </div>
+
+  <button class="primary" onclick="shortenUrl()">Create Short Link</button>
+
+  <div class="divider"></div>
+
+  <button class="secondary" onclick="getAllUrl()">Show All Links</button>
+
+  <div id="result"></div>
+</div>
   
 </body>
 </html>

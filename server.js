@@ -6,7 +6,7 @@
 // require("dotenv").config();
 const express = require("express");
 const crypto = require("crypto");
-const { createUrl, getLongUrl, getAllUrl, shortCodeExists, longCodeExists, getShortUrl } = require("./urlModel");
+const { createUrl, getLongUrl, getAllUrl, shortCodeExists, longCodeExists, getShortUrl, deletelink } = require("./urlModel");
 
 const app = express();
 app.use(express.json());
@@ -52,7 +52,7 @@ app.post("/shorten", async (req, res) => {
     console.log(shortCode)
     if(shortCode){
       return res.json({
-        shortUrl: `http://localhost:4000/${shortCode}`,
+        shortUrl: `/${shortCode}`,
         reused: true
       });
     }
@@ -77,7 +77,7 @@ app.post("/shorten", async (req, res) => {
     await createUrl(customCode, longUrl);
 
     res.json({
-      shortUrl: `http://localhost:4000/${customCode}`,
+      shortUrl: `/${customCode}`,
       reused: false
     });
 
@@ -94,7 +94,7 @@ app.post("/shorten", async (req, res) => {
 app.get("/allurl", async (req, res) => {
   try {
     const result = await getAllUrl();
-    console.log(result)
+    // console.log(result)
     res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -106,7 +106,7 @@ app.get("/allurl", async (req, res) => {
   GET shortcode
   Resolves a shortcode and performs an HTTP redirect
   to the original long URL.
- */
+*/
 app.get("/:shortCode", async (req, res) => {
   console.log("called short code......"+req.params.shortCode)
   try {
@@ -126,6 +126,26 @@ app.get("/:shortCode", async (req, res) => {
     console.error(err);
     res.status(500).send("Server error");
   }
+});
+
+/*
+  DELETE short link
+*/
+app.delete("/delete/:shortCode", async (req, res) => {
+  console.log("delete............." +req.params.shortCode)
+  try {
+    const deleted = await deletelink(req.params.shortCode);
+    console.log("delete............." +deleted)
+    if (!deleted) {
+      return res.status(404).json({ err: "Short link not found" });
+    }
+
+    res.json({ message: "Short link deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ err: "Server error" });
+  }
+  
 });
 
 app.listen(PORT, () => {

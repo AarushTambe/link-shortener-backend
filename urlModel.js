@@ -76,4 +76,15 @@ async function longCodeExists(code) {
   );
   return result.rows.length > 0;
 }
-module.exports = { createUrl, getLongUrl, getAllUrl, shortCodeExists, longCodeExists, getShortUrl };
+
+/*
+  Delete a short link by shortcode
+*/
+async function deletelink(shortcode) {
+  const result = await pool.query(
+    "DELETE FROM linkshortner WHERE shortlink=$1",
+    [shortcode]
+  );
+  return result.rowCount;
+}
+module.exports = { createUrl, getLongUrl, getAllUrl, shortCodeExists, longCodeExists, getShortUrl, deletelink };
