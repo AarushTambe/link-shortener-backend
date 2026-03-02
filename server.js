@@ -48,32 +48,32 @@ app.post("/shorten", async (req, res) => {
    console.log(shortUrl)
 
     // STEP 1: Check if long URL already exists
-    var shortCode = await getShortUrl(longUrl);
-    console.log(shortCode)
-    if(shortCode){
-      return res.json({
-        shortUrl: `/${shortCode}`,
-        reused: true
-      });
-    }
+    // var shortCode = await getShortUrl(longUrl);
+    // console.log(shortCode)
+    // if(shortCode){
+    //   return res.json({
+    //     shortUrl: `/${shortCode}`,
+    //     reused: true
+    //   });
+    // }
     
-    //  STEP 2: Validate short code
-    customCode = shortUrl
+    //  STEP 1: Validate short code format
+    customCode = shortUrl.trim();
     if (!/^[a-zA-Z0-9_-]+$/.test(customCode)) {
       return res.status(400).json({
         error: "Short link can contain only letters, numbers, _ and -"
       });
     }
 
-    //  STEP 3: Check short code uniqueness
+    //  STEP 2: Check short code uniqueness
     const taken = await shortCodeExists(customCode);
     if (taken) {
       return res.status(409).json({
-        error: "Short link already taken"
+        error: "This shortcode is already taken. Please choose another one."
       });
     }
 
-    //  STEP 4: Create mapping
+    //  STEP 3:  Always create a new mapping
     await createUrl(customCode, longUrl);
 
     res.json({
