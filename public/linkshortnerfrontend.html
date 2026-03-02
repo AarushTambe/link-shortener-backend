@@ -28,6 +28,16 @@
       margin-top: 15px;
       word-break: break-all;
     }
+    .error {
+      color: red;
+    }
+    .success {
+      color: #2e7d32;          /* green */
+      background: #edf7ed;     /* light green background */
+      border: 1px solid #c8e6c9;
+      padding: 6px 8px;
+      border-radius: 4px;
+    }
  
   </style>
   <script>
@@ -37,10 +47,14 @@
   Intended for visibility and testing.
  */
   async function getAllUrl() {
+    const resultDiv = document.getElementById("result");
+
+  resultDiv.classList.remove("error", "success");
+  resultDiv.innerHTML = "";
+
     const res = await fetch("/allurl");
     const data = await res.json();
 
-    const resultDiv = document.getElementById("result");
     resultDiv.innerHTML = ""; 
 
     data.forEach((row) => {
@@ -77,14 +91,18 @@
       const shortUrl = document.getElementById("customCode").value;
       const resultDiv = document.getElementById("result");
       
+      resultDiv.classList.remove("error", "success");
+      resultDiv.innerHTML = "";
 
       if (!longUrl) {
         resultDiv.innerText = "Please enter a URL";
+        resultDiv.classList.add("error");
         return;
       }
 
       if (!shortUrl) {
         resultDiv.innerText = "Please enter a short code";
+        resultDiv.classList.add("error");
         return;
       }
 
@@ -100,34 +118,41 @@
         const data = await response.json();
 
         if (!response.ok) {
-          resultDiv.innerText = "Error creating short link. Error: " + data.err;
+          resultDiv.innerText =  data.error;
+          resultDiv.classList.add("error");
           return;
         }
 
-        if(data.reused)
-          resultDiv.innerHTML = `ShortCode already exist<br>`
-        else
-          resultDiv.innerHTML = ``
-
-        resultDiv.innerHTML += `
-          Short URL:
+        resultDiv.classList.add("success");
+        resultDiv.innerHTML = `
+          Short URL created successfully:<br>
           <a href="${data.shortUrl}" target="_blank">
             ${data.shortUrl}
           </a>
         `;
       } catch (err) {
         resultDiv.innerText = "Server not reachable"+err;
+        resultDiv.classList.add("error");
       }
     }
 
     async function deleteShortLink(event, shortCode) {
       event.preventDefault(); // stop navigation
-
+    
       if (!confirm("Delete short link " + shortCode +"?")) return;
 
+      const password = prompt("Enter delete password:");
+      if (!password) {
+        alert("Delete cancelled: password required");
+        return;
+      }
       try {
         const res = await fetch("/delete/"+shortCode, {
-        method: "DELETE"
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json"
+       },
+      body: JSON.stringify({ password })
       });
 
       const data = await res.json();

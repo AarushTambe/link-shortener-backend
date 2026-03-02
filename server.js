@@ -3,7 +3,7 @@
   Exposes APIs to create custom short links and
   redirect short links to original URLs.
 */
-// require("dotenv").config();
+ require("dotenv").config();
 const express = require("express");
 const crypto = require("crypto");
 const { createUrl, getLongUrl, getAllUrl, shortCodeExists, longCodeExists, getShortUrl, deletelink } = require("./urlModel");
@@ -14,7 +14,7 @@ const path = require("path");
 const PORT = 4000;
 
 function generateShortCode() {
-  return crypto.randomBytes(3).toString("hex"); // 6 chars
+  return crypto.randomBytes(3).toString("hex");
 }
 
 /*
@@ -44,9 +44,6 @@ app.post("/shorten", async (req, res) => {
   try {
     const { longUrl, shortUrl } = req.body;
 
-   console.log(longUrl)
-   console.log(shortUrl)
-   
     //  STEP 1: Validate short code format
     customCode = shortUrl.trim();
     if (!/^[a-zA-Z0-9_-]+$/.test(customCode)) {
@@ -84,7 +81,6 @@ app.post("/shorten", async (req, res) => {
 app.get("/allurl", async (req, res) => {
   try {
     const result = await getAllUrl();
-    // console.log(result)
     res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -98,10 +94,8 @@ app.get("/allurl", async (req, res) => {
   to the original long URL.
 */
 app.get("/:shortCode", async (req, res) => {
-  console.log("called short code......"+req.params.shortCode)
   try {
     longUrl = await getLongUrl(req.params.shortCode);
-    console.log("longUrl-> " + longUrl)
     if (!longUrl) return res.status(404).send("Short link not found");
 
     //ensure protocol exists
@@ -109,9 +103,7 @@ app.get("/:shortCode", async (req, res) => {
       longUrl = "https://" + longUrl;
     }
 
-    console.log("Going t redirect to -> " + longUrl)
     res.redirect(longUrl);
-    console.log("done!!")
   } catch (err) {
     console.error(err);
     res.status(500).send("Server error");
@@ -119,23 +111,51 @@ app.get("/:shortCode", async (req, res) => {
 });
 
 /*
-  DELETE short link
+  DELETE short link (password protected)
 */
-app.delete("/delete/:shortCode", async (req, res) => {
-  console.log("delete............." +req.params.shortCode)
+  app.delete("/delete/:shortCode", async (req, res) => {
+
   try {
-    const deleted = await deletelink(req.params.shortCode);
-    console.log("delete............." +deleted)
-    if (!deleted) {
-      return res.status(404).json({ err: "Short link not found" });
+    const { password } = req.body;
+con
+    if (!process.env.DELETE_PASSWORD) {
+      return res.status(500).json({
+        error: "Server misconfiguration"
+  });
+}
+    // Password required
+    if (!password) {
+      return res.status(401).json({
+        error: "Password required to delete link"
+      });
     }
 
-    res.json({ message: "Short link deleted successfully" });
+    //  Password validation
+    if (password !== process.env.DELETE_PASSWORD) {
+      return res.status(403).json({
+        error: "Invalid password"
+      });
+    }
+
+    //  Delete logic (unchanged)
+    const deleted = await deletelink(req.params.shortCode);
+    if (!deleted) {
+      return res.status(404).json({
+        error: "Short link not found"
+      });
+    }
+
+    //  Success
+    res.json({
+      message: "Short link deleted successfully"
+    });
+
   } catch (err) {
     console.error(err);
-    res.status(500).json({ err: "Server error" });
+    res.status(500).json({
+      error: "Server error"
+    });
   }
-  
 });
 
 app.listen(PORT, () => {
