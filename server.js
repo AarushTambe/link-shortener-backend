@@ -46,17 +46,7 @@ app.post("/shorten", async (req, res) => {
 
    console.log(longUrl)
    console.log(shortUrl)
-
-    // STEP 1: Check if long URL already exists
-    // var shortCode = await getShortUrl(longUrl);
-    // console.log(shortCode)
-    // if(shortCode){
-    //   return res.json({
-    //     shortUrl: `/${shortCode}`,
-    //     reused: true
-    //   });
-    // }
-    
+   
     //  STEP 1: Validate short code format
     customCode = shortUrl.trim();
     if (!/^[a-zA-Z0-9_-]+$/.test(customCode)) {
