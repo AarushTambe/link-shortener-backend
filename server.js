@@ -13,9 +13,6 @@ app.use(express.json());
 const path = require("path");
 const PORT = 4000;
 
-function generateShortCode() {
-  return crypto.randomBytes(3).toString("hex");
-}
 
 /*
   Enable CORS so the frontend and Chrome extension
@@ -30,7 +27,12 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get("/", (req, res) => {
+/*
+  defining the zip file download path
+*/
+app.use("/downloads", express.static(path.join(__dirname, "downloads")));
+
+app.get("/", async (req, res) => {
   res.sendFile(path.join(__dirname, "public", "linkshortnerfrontend.html"));
 });
 
