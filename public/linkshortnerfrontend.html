@@ -187,7 +187,7 @@
 
 const MAX_SHORTCODE_LENGTH=10;
 const MAX_LONGCODE_LENGTH=100;
-
+const pattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]{2,}(\/.*)?$/i;
 /*
   Sends user-defined shortcode and long URL
   to the backend and displays feedback.
@@ -211,6 +211,15 @@ const MAX_LONGCODE_LENGTH=100;
         resultDiv.classList.add("error");
         return;
       }
+
+      // Accept with or without protocol
+
+        
+        if(!pattern.test(longUrl)){
+          resultDiv.innerText = "Please enter a valid URL";
+          resultDiv.classList.add("error");
+          return;
+        };
 
       if (!shortUrl) {
         resultDiv.innerText = "Please enter a short code";
@@ -327,9 +336,9 @@ const MAX_LONGCODE_LENGTH=100;
       </a>
       <p></p>
       <div class="step"><span class="step-no">1</span><div>Download the ZIP file</div></div>
-      <div class="step"><span class="step-no">2</span><div>Extract the folder</div></div>
-      <div class="step"><span class="step-no">3</span><div>Open <code>chrome://extensions</code></div></div>
-      <div class="step"><span class="step-no">4</span><div>Enable Developer Mode</div></div>
+      <div class="step"><span class="step-no">2</span><div>Extract the ZIP file</div></div>
+      <div class="step"><span class="step-no">3</span><div>Copy<code>'chrome://extensions'</code>this to the browser's adress bar</div></div>
+      <div class="step"><span class="step-no">4</span><div>Enable Developer Mode (at top right corner)</div></div>
       <div class="step"><span class="step-no">5</span><div>Click <b>Load unpacked</b> and select the folder</div></div>
 
       <div class="note">
