@@ -117,7 +117,7 @@ app.get("/:shortCode", async (req, res) => {
 
   try {
     const { password } = req.body;
-con
+
     if (!process.env.DELETE_PASSWORD) {
       return res.status(500).json({
         error: "Server misconfiguration"
