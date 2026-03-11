@@ -6,7 +6,7 @@
  require("dotenv").config();
 const express = require("express");
 const crypto = require("crypto");
-const { createUrl, getLongUrl, getAllUrl, shortCodeExists, longCodeExists, getShortUrl, deletelink } = require("./urlModel");
+const { createUrl, getLongUrl, getAllUrl, shortCodeExists, deletelink, register, verifyLogin } = require("./urlModel");
 
 const app = express();
 app.use(express.json());
@@ -44,7 +44,7 @@ app.get("/", async (req, res) => {
 */
 app.post("/shorten", async (req, res) => {
   try {
-    const { longUrl, shortUrl } = req.body;
+    const { longUrl, shortUrl, account } = req.body;
 
     //  STEP 1: Validate short code format
     customCode = shortUrl.trim();
@@ -55,7 +55,7 @@ app.post("/shorten", async (req, res) => {
     }
 
     //  STEP 2: Check short code uniqueness
-    const taken = await shortCodeExists(customCode);
+    const taken = await shortCodeExists(customCode, account);
     if (taken) {
       return res.status(409).json({
         error: "This shortcode is already taken. Please choose another one."
@@ -63,7 +63,7 @@ app.post("/shorten", async (req, res) => {
     }
 
     //  STEP 3:  Always create a new mapping
-    await createUrl(customCode, longUrl);
+    await createUrl(customCode, longUrl, account);
 
     res.json({
       shortUrl: `/${customCode}`,
@@ -81,8 +81,9 @@ app.post("/shorten", async (req, res) => {
   Reterives all the links
 */
 app.get("/allurl", async (req, res) => {
+  const account = req.query.account;
   try {
-    const result = await getAllUrl();
+    const result = await getAllUrl(account);
     res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -96,8 +97,9 @@ app.get("/allurl", async (req, res) => {
   to the original long URL.
 */
 app.get("/:shortCode", async (req, res) => {
+    const { shortCode, account } = req.params;
   try {
-    longUrl = await getLongUrl(req.params.shortCode);
+    longUrl = await getLongUrl(shortCode, account);
     if (!longUrl) return res.status(404).send("Short link not found");
 
     //ensure protocol exists
@@ -118,7 +120,7 @@ app.get("/:shortCode", async (req, res) => {
   app.delete("/delete/:shortCode", async (req, res) => {
 
   try {
-    const { password } = req.body;
+    const { password, account } = req.body;
 
     if (!process.env.DELETE_PASSWORD) {
       return res.status(500).json({
@@ -140,7 +142,7 @@ app.get("/:shortCode", async (req, res) => {
     }
 
     //  Delete logic (unchanged)
-    const deleted = await deletelink(req.params.shortCode);
+    const deleted = await deletelink(req.params.shortCode, account);
     if (!deleted) {
       return res.status(404).json({
         error: "Short link not found"
@@ -159,6 +161,40 @@ app.get("/:shortCode", async (req, res) => {
     });
   }
 });
+
+/* 
+  Register the new user
+*/
+app.get("/register", async (req, res) => {
+  const { account, key} = req.body;
+  try {
+    const result = await register(account, key);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+    
+  }
+});
+
+/* 
+  Login the user
+*/
+app.get("/login", async (req, res) => {
+  const { account, key} = req.body;
+  try {
+    const result = await verifyLogin(account, key);
+    if (!result) {
+      return res.status(409).json({
+        error: "User or password is incorrect."
+      });
+    }
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+    
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

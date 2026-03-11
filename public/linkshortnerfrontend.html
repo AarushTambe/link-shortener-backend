@@ -136,18 +136,17 @@
   </style>
 
   <script>
-
+    const account = "anonymous";
 /*
   Fetch and display all stored short links.
   Intended for visibility and testing.
  */
   async function getAllUrl() {
     const resultDiv = document.getElementById("result");
-
   resultDiv.classList.remove("error", "success");
   resultDiv.innerHTML = "";
 
-    const res = await fetch("/allurl");
+    const res = await fetch("/allurl?account="+account);
     const data = await res.json();
 
     resultDiv.innerHTML = ""; 
@@ -186,7 +185,7 @@
 }
 
 const MAX_SHORTCODE_LENGTH=10;
-const MAX_LONGCODE_LENGTH=100;
+const MAX_LONGCODE_LENGTH=250;
 const pattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]{2,}(\/.*)?$/i;
 /*
   Sends user-defined shortcode and long URL
@@ -239,7 +238,7 @@ const pattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]{2,}(\/.*)?$/i;
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ longUrl, shortUrl })
+          body: JSON.stringify({ longUrl, shortUrl, account })
         });
         
         const data = await response.json();
@@ -279,7 +278,7 @@ const pattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]{2,}(\/.*)?$/i;
           headers: {
             "Content-Type": "application/json"
        },
-      body: JSON.stringify({ password })
+      body: JSON.stringify({ password, account })
       });
 
       const data = await res.json();
